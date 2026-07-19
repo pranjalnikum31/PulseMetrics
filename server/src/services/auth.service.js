@@ -16,8 +16,6 @@ const register = async (data) => {
     },
   });
 
-
-
   if (existingCompany) {
     return {
       success: false,
@@ -29,7 +27,7 @@ const register = async (data) => {
       email: ownerEmail,
     },
   });
-console.log("Existing User:", existingUser);
+  console.log("Existing User:", existingUser);
   if (existingUser) {
     return {
       success: false,
@@ -62,14 +60,56 @@ console.log("Existing User:", existingUser);
     token: result.token,
     company: result.company,
     user: {
-        id: result.user.id,
-        name: result.user.name,
-        email: result.user.email,
-        role: result.user.role,
+      id: result.user.id,
+      name: result.user.name,
+      email: result.user.email,
+      role: result.user.role,
     },
+  };
+};
+const login = async (data) => {
+
+  const { email, password } = data;
+  if (!email || !password) {
+    return {
+      success: false,
+      message: "Email and password are required",
+    };
+  }
+  const user=await prisma.user.findUnique({
+    where:{
+      email:email
+    }
+  })
+  if(!user){
+    return {
+      success: false,
+      message: "user not found",
+    };
+  }
+  const isPasswordValid=await bcrypt.compare(password,user.password)
+  if(!isPasswordValid){
+    return {
+      success: false,
+      message: "Invalid password",
+    }
+  }
+  const token=generateToken(user);
+
+  return {
+    success: true,
+    message: "Login successful",
+    token:token,
+    user:{
+      id:user.id,
+      name:user.name,
+      email:user.email,
+      role:user.role
+    }
   };
 };
 
 module.exports = {
   register,
+  login,
 };
