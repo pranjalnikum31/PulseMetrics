@@ -1,6 +1,6 @@
 const prisma = require("../config/prisma");
 
-const createProject = async (data, user) => {
+const createProjectService = async (data, user) => {
   const { name, description } = data;
 
   if (!name) {
@@ -34,6 +34,58 @@ const createProject = async (data, user) => {
   };
 };
 
+const getAllProjectsService = async (user) => {
+  try {
+    const projects = await prisma.project.findMany({
+      where: {
+        companyId: user.companyId,
+      },
+      orderBy: {
+        createdAt: "desc",
+      },
+    });
+    return {
+      success: true,
+      message: "Projects fetched successfully",
+      data: projects,
+    };
+  } catch (error) {
+    return {
+      success: false,
+      message: "Error occurred while fetching projects",
+    };
+  }
+};
+
+const getProjectByIdService = async (id, user) => {
+  try {
+    const project = await prisma.project.findFirst({
+      where: {
+        id,
+        companyId: user.companyId,
+      },
+    });
+    if (!project) {
+      return {
+        success: false,
+        message: "Project not found",
+      };
+    }
+    return {
+      success: true,
+      message: "Project fetched successfully",
+      data: project,
+    };
+  } catch (error) {
+    return {
+      success: false,
+      message: "Error occurred while fetching project",
+    };
+  }
+};
+
 module.exports = {
-  createProject,
+  createProjectService,
+  getAllProjectsService,
+  getProjectByIdService,
 };
