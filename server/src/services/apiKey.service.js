@@ -24,7 +24,7 @@ const createApiKeyService = async (data, user) => {
         name,
         publicKey,
         secretKey,
-        projectId,//sending both keys for now
+        projectId, //sending both keys for now
       },
     });
     return {
@@ -40,6 +40,71 @@ const createApiKeyService = async (data, user) => {
   }
 };
 
+const getAllApiKeysService = async (user) => {
+  try {
+    const apiKeys = await prisma.apiKey.findMany({
+      where: {
+        project: {
+          companyId: user.companyId,
+        },
+      },
+      select: {
+        id: true,
+        name: true,
+        publicKey: true,
+        isActive: true,
+        createdAt: true,
+        project: {
+          select: {
+            id: true,
+            name: true,
+          },
+        },
+      },
+    });
+    return {
+      success: true,
+      message: "API keys fetched successfully",
+      data: apiKeys,
+    };
+  } catch (error) {}
+};
+
+const updateApiKeyService = async (id, data, user) => {
+  try {
+    const apiKey = await prisma.apiKey.findFirst({
+      where: {
+        id,
+        project: {
+          companyId: user.companyId,
+        },
+      },
+    });
+    if (!apiKey) {
+      return {
+        success: false,
+        message: "API key not found",
+      };
+    }
+    const { name, isActive } = data;
+    const updatedApiKey = await prisma.apiKey.update({
+      where: {
+        id,
+      },
+      data: {
+        name,
+        isActive,
+      },
+    });
+    return {
+      success: true,
+      message: "API key updated successfully",
+      data: updatedApiKey,
+    };
+  } catch (error) {}
+};
+
 module.exports = {
   createApiKeyService,
+  getAllApiKeysService,
 };
