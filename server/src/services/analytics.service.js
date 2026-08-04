@@ -67,8 +67,43 @@ const getTopEventsService = async (user) => {
         throw error;
     }
 }
+const getRecentEventsService = async (user) => {
+    try{
+        const recentEvents=await prisma.event.findMany({
+            where:{
+                project:{
+                    companyId:user.companyId
+                }
+            },
+            include:{
+                project:{
+                    select:{
+                        name:true
+                    }
+                }
+            },
+            orderBy: {
+                timestamp: "desc",
+            },
+
+            take: 10,
+        });
+        const formattedEvents = recentEvents.map((event) => ({
+            eventName: event.eventName,
+            project: event.project.name,
+            timestamp: event.timestamp,
+        }));
+        return {
+            success: true,
+            data: formattedEvents
+        };
+    }catch(error){
+        throw error;
+    }
+}
 
 module.exports = {
     getOverviewService,
-    getTopEventsService
+    getTopEventsService,
+    getRecentEventsService
 };
