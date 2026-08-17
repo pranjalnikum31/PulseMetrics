@@ -5,6 +5,7 @@ import MetricCard from "../components/MetricCard";
 import EventsChart from "../components/EventsChart";
 import RecentActivity from "../components/RecentActivity";
 import TopEvents from "../components/TopEvents";
+import ProjectList from "../components/ProjectList";
 
 const Home = () => {
   return (
@@ -31,6 +32,7 @@ const Home = () => {
           <div className="col-span-2">
             <TopEvents />
           </div>
+          <ProjectList/>
         </section>
       </main>
     </div>
