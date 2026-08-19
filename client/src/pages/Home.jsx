@@ -6,8 +6,24 @@ import EventsChart from "../components/EventsChart";
 import RecentActivity from "../components/RecentActivity";
 import TopEvents from "../components/TopEvents";
 import ProjectList from "../components/ProjectList";
+import { useEffect, useState } from "react";
+import { getOverview } from "../services/api";
 
 const Home = () => {
+  const [overview, setOverview] = useState(null);
+
+  useEffect(() => {
+    const fetchOverview = async () => {
+      try {
+        const data = await getOverview();
+        setOverview(data);
+      } catch (error) {
+        console.error("Failed to fetch overview:", error);
+      }
+    };
+    fetchOverview();
+  }, []);
+
   return (
     <div className="min-h-screen bg-[#080D18] flex">
       <SideBar />
@@ -15,11 +31,11 @@ const Home = () => {
         <Header />
 
         <section className="grid grid-cols-3 gap-5 mb-6">
-          <MetricCard title="Total Projects" value="3" change="+12%" />
+          <MetricCard title="Total Projects" value={overview?.totalProjects ?? 0} change="+12%" />
 
-          <MetricCard title="Total Events" value="12,450" change="+18%" />
+          <MetricCard title="Total Events" value={overview?.totalEvents ?? 0} change="+18%" />
 
-          <MetricCard title="Active API Keys" value="7" change="+5%" />
+          <MetricCard title="Active API Keys" value={overview?.activeApiKeys ?? 0} change="+5%" />
         </section>
         <section className="grid grid-cols-3 gap-5">
           <div className="col-span-2">
@@ -32,7 +48,7 @@ const Home = () => {
           <div className="col-span-2">
             <TopEvents />
           </div>
-          <ProjectList/>
+          <ProjectList />
         </section>
       </main>
     </div>
