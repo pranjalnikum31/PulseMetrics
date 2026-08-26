@@ -7,22 +7,44 @@ import RecentActivity from "../components/RecentActivity";
 import TopEvents from "../components/TopEvents";
 import ProjectList from "../components/ProjectList";
 import { useEffect, useState } from "react";
-import { getOverview } from "../services/api";
+import {
+  getOverview,
+  getTopEvents,
+  getRecentEvents,
+  getEventsByDay,
+} from "../services/api";
 
 const Home = () => {
   const [overview, setOverview] = useState(null);
+  const [topEvents, setTopEvents] = useState([]);
+  const [recentEvents, setRecentEvents] = useState([]);
+  const [eventsByDay, setEventsByDay] = useState([]);
 
   useEffect(() => {
     const fetchOverview = async () => {
       try {
-        const data = await getOverview();
-        setOverview(data);
+        const [overviewData, topEventsData, recentEventsData, eventsByDayData] =
+          await Promise.all([
+            getOverview(),
+            getTopEvents(),
+            getRecentEvents(),
+            getEventsByDay(),
+          ]);
+
+        setTopEvents(topEventsData);
+        setOverview(overviewData);
+        setRecentEvents(recentEventsData);
+        setEventsByDay(eventsByDayData);
       } catch (error) {
         console.error("Failed to fetch overview:", error);
       }
     };
     fetchOverview();
   }, []);
+  const chartData  = eventsByDay.map((item) => ({
+    date: item.date,
+    events: item.count,
+  }));
 
   return (
     <div className="min-h-screen bg-[#080D18] flex">
@@ -31,22 +53,34 @@ const Home = () => {
         <Header />
 
         <section className="grid grid-cols-3 gap-5 mb-6">
-          <MetricCard title="Total Projects" value={overview?.totalProjects ?? 0} change="+12%" />
+          <MetricCard
+            title="Total Projects"
+            value={overview?.totalProjects ?? 0}
+            change="+12%"
+          />
 
-          <MetricCard title="Total Events" value={overview?.totalEvents ?? 0} change="+18%" />
+          <MetricCard
+            title="Total Events"
+            value={overview?.totalEvents ?? 0}
+            change="+18%"
+          />
 
-          <MetricCard title="Active API Keys" value={overview?.activeApiKeys ?? 0} change="+5%" />
+          <MetricCard
+            title="Active API Keys"
+            value={overview?.activeApiKeys ?? 0}
+            change="+5%"
+          />
         </section>
         <section className="grid grid-cols-3 gap-5">
           <div className="col-span-2">
-            <EventsChart />
+            <EventsChart data={chartData} />
           </div>
 
-          <RecentActivity />
+          <RecentActivity events={recentEvents} />
         </section>
         <section className="grid grid-cols-3 gap-5 mt-6">
           <div className="col-span-2">
-            <TopEvents />
+            <TopEvents events={topEvents} />
           </div>
           <ProjectList />
         </section>

@@ -7,17 +7,9 @@ import {
   Tooltip,
   ResponsiveContainer,
 } from "recharts";
-const data = [
-  { date: "Aug 7", events: 120 },
-  { date: "Aug 8", events: 185 },
-  { date: "Aug 9", events: 150 },
-  { date: "Aug 10", events: 240 },
-  { date: "Aug 11", events: 210 },
-  { date: "Aug 12", events: 320 },
-  { date: "Aug 13", events: 280 },
-];
 
-const EventsChart = () => {
+
+const EventsChart = ({ data }) => {
   return (
     <div className="bg-[#0F1726] border border-[#1E293B] rounded-xl p-6 ">
       <div className="mb-6">
