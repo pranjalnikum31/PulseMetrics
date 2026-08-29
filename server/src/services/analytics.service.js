@@ -88,6 +88,7 @@ const getRecentEventsService = async (user) => {
       take: 10,
     });
     const formattedEvents = recentEvents.map((event) => ({
+      id: event.id,
       eventName: event.eventName,
       project: event.project.name,
       timestamp: event.timestamp,

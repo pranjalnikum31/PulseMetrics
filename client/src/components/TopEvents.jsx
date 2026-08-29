@@ -14,14 +14,14 @@ const TopEvents = ({ events }) => {
       ) : (
         <div className="space-y-4">
           {events.map((event, index) => (
-            <div key={event.name} className="flex items-center gap-4">
+            <div key={event.eventName} className="flex items-center gap-4">
               <div className="w-7 h-7 rounded-lg bg-[#6366F1]/15 text-[#818CF8] flex items-center justify-center text-xs font-medium">
                 {index + 1}
               </div>
 
               <div className="flex-1">
                 <p className="text-sm font-medium text-[#F8FAFC]">
-                  {event.name}
+                  {event.eventName}
                 </p>
 
                 <div className="mt-2 h-1.5 bg-[#1E293B] rounded-full">

@@ -43,6 +43,13 @@ const getAllProjectsService = async (user) => {
       orderBy: {
         createdAt: "desc",
       },
+      include: {
+        _count: {
+          select: {
+            events: true,
+          },
+        },
+      },
     });
     return {
       success: true,

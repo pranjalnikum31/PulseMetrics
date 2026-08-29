@@ -36,7 +36,7 @@ export const login = async (data) => {
 };
 export const getOverview = async () => {
   const response = await api.get("/analytics/overview");
-  return response.data;
+  return response.data.data;
 };
 
 export const getProfile = async () => {
@@ -46,14 +46,18 @@ export const getProfile = async () => {
 
 export const getTopEvents = async () => {
   const response = await api.get("/analytics/top-events");
-  return response.data;
+  return response.data.data;
 };
 export const getRecentEvents = async () => {
   const response = await api.get("/analytics/recent-events");
-  return response.data;
+  return response.data.data;
 };
 export const getEventsByDay = async (days = 7) => {
   const response = await api.get(`/analytics/events-by-day?days=${days}`);
-  return response.data;
+  return response.data.data;
+};
+export const getProjects = async () => {
+  const response = await api.get("/projects");
+  return response.data.data;
 };
 export default api;

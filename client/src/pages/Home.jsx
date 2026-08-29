@@ -12,6 +12,7 @@ import {
   getTopEvents,
   getRecentEvents,
   getEventsByDay,
+  getProjects,
 } from "../services/api";
 
 const Home = () => {
@@ -19,22 +20,25 @@ const Home = () => {
   const [topEvents, setTopEvents] = useState([]);
   const [recentEvents, setRecentEvents] = useState([]);
   const [eventsByDay, setEventsByDay] = useState([]);
+  const [projects, setProjects] = useState([]);
 
   useEffect(() => {
     const fetchOverview = async () => {
       try {
-        const [overviewData, topEventsData, recentEventsData, eventsByDayData] =
+        const [overviewData, topEventsData, recentEventsData, eventsByDayData, projectsData] =
           await Promise.all([
             getOverview(),
             getTopEvents(),
             getRecentEvents(),
             getEventsByDay(),
+            getProjects(),
           ]);
 
         setTopEvents(topEventsData);
         setOverview(overviewData);
         setRecentEvents(recentEventsData);
         setEventsByDay(eventsByDayData);
+        setProjects(projectsData);      
       } catch (error) {
         console.error("Failed to fetch overview:", error);
       }
@@ -77,12 +81,13 @@ const Home = () => {
           </div>
 
           <RecentActivity events={recentEvents} />
+          
         </section>
         <section className="grid grid-cols-3 gap-5 mt-6">
           <div className="col-span-2">
             <TopEvents events={topEvents} />
           </div>
-          <ProjectList />
+          <ProjectList projects={projects} />
         </section>
       </main>
     </div>

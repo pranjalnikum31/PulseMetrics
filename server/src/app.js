@@ -1,11 +1,13 @@
 const express=require('express');
 const app=express();
+const cors=require('cors');
 const authRoutes=require('./routes/auth.routes');
 const projectRoutes=require('./routes/project.routes')
 const apiKeyRoutes = require("./routes/apiKey.routes");
 const eventRoutes = require("./routes/event.routes");
 const analyticsRoutes = require("./routes/analytics.routes");
 
+app.use(cors({origin: "*"}));
 app.use(express.json());
 
 app.get('/',(req,res)=>{
