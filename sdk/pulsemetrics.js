@@ -12,6 +12,8 @@ const PulseMetrics = {
     this.baseUrl = baseUrl;
 
     console.log("PulseMetrics initialized");
+
+    
   },
   async track(eventName, properties = {}) {
     if (!this.apiKey) {
