@@ -1,5 +1,3 @@
-const axios = require("axios");
-
 const PulseMetrics = {
   apiKey: null,
   baseUrl: null,
@@ -8,43 +6,57 @@ const PulseMetrics = {
     if (!apiKey) {
       throw new Error("API key is required.");
     }
+
     this.apiKey = apiKey;
     this.baseUrl = baseUrl;
 
     console.log("PulseMetrics initialized");
-
-    
+    if (typeof window !== "undefined") {
+      this.track("page_view", {
+        path: window.location.pathname,
+        url: window.location.href,
+      }).catch((error) => {
+        console.error("Failed to record page view:", error.message);
+      });
+    }
   },
+
   async track(eventName, properties = {}) {
     if (!this.apiKey) {
       throw new Error("PulseMetrics has not been initialized.");
     }
+
     if (!eventName) {
       throw new Error("Event name is required.");
     }
 
     try {
-      const response = await axios.post(
-        `${this.baseUrl}/api/events`,
-        {
+      const response = await fetch(`${this.baseUrl}/api/events`, {
+        method: "POST",
+
+        headers: {
+          "Content-Type": "application/json",
+          "x-api-key": this.apiKey,
+        },
+
+        body: JSON.stringify({
           eventName,
           properties,
-        },
-        {
-          headers: {
-            "x-api-key": this.apiKey,
-          },
-        },
-      );
+        }),
+      });
 
-      return response.data;
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.message || "Failed to record event");
+      }
+
+      return data;
     } catch (error) {
-      console.error(
-        "PulseMetrics Error:",
-        error.response?.data || error.message,
-      );
+      console.error("PulseMetrics Error:", error.message);
       throw error;
     }
   },
 };
-module.exports = PulseMetrics;
+
+export default PulseMetrics;
