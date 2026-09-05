@@ -19,6 +19,21 @@ const PulseMetrics = {
         console.error("Failed to record page view:", error.message);
       });
     }
+
+    document.addEventListener("click", (e) => {
+      const element =
+        e.target instanceof Element ? e.target.closest("button, a") : null;
+
+      if (!element) return;
+
+      this.track("click", {
+        tag: element.tagName,
+        id: element.id || null,
+        path: window.location.pathname,
+      }).catch((error) => {
+        console.error("Failed to record click:", error.message);
+      });
+    });
   },
 
   async track(eventName, properties = {}) {
