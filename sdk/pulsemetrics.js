@@ -41,8 +41,19 @@ const PulseMetrics = {
       throw new Error("PulseMetrics has not been initialized.");
     }
 
-    if (!eventName) {
-      throw new Error("Event name is required.");
+    if (typeof eventName !== "string" || !eventName.trim()) {
+      throw new Error("Event name must be a non-empty string.");
+    }
+
+    if (eventName.length > 100) {
+      throw new Error("Event name must be 100 characters or less.");
+    }
+    if (
+      typeof properties !== "object" ||
+      properties === null ||
+      Array.isArray(properties)
+    ) {
+      throw new Error("Event properties must be an object.");
     }
 
     try {
@@ -69,9 +80,9 @@ const PulseMetrics = {
       return data;
     } catch (error) {
       console.error("PulseMetrics Error:", error.message);
-      throw error;
+      return null;
     }
   },
 };
-
+//eventname normalization and properties size
 export default PulseMetrics;
