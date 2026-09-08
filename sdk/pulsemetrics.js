@@ -1,6 +1,7 @@
 const PulseMetrics = {
   apiKey: null,
   baseUrl: null,
+  eventQueue: [],
 
   init({ apiKey, baseUrl = "http://localhost:3000" }) {
     if (!apiKey) {
@@ -55,7 +56,13 @@ const PulseMetrics = {
     ) {
       throw new Error("Event properties must be an object.");
     }
+    const event = {
+      eventName,
+      properties,
+      timestamp: new Date().toISOString(),
+    };
 
+    this.eventQueue.push(event);
     try {
       const response = await fetch(`${this.baseUrl}/api/events`, {
         method: "POST",
@@ -76,6 +83,7 @@ const PulseMetrics = {
       if (!response.ok) {
         throw new Error(data.message || "Failed to record event");
       }
+      this.eventQueue.shift();
 
       return data;
     } catch (error) {
