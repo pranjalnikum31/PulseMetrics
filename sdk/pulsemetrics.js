@@ -2,10 +2,15 @@ const PulseMetrics = {
   apiKey: null,
   baseUrl: null,
   eventQueue: [],
+  maxQueueSize: 100,
 
   init({ apiKey, baseUrl = "http://localhost:3000" }) {
     if (!apiKey) {
       throw new Error("API key is required.");
+    }
+
+    if (this.flushInterval) {
+      clearInterval(this.flushInterval);
     }
 
     this.apiKey = apiKey;
@@ -35,6 +40,14 @@ const PulseMetrics = {
         console.error("Failed to record click:", error.message);
       });
     });
+    window.addEventListener("online", () => {
+      this.flush();
+    });
+    this.flushInterval = setInterval(() => {
+      if (this.eventQueue.length > 0) {
+        this.flush();
+      }
+    }, 5000);
   },
 
   async track(eventName, properties = {}) {
@@ -62,19 +75,26 @@ const PulseMetrics = {
       timestamp: new Date().toISOString(),
     };
 
+    if (this.eventQueue.length >= this.maxQueueSize) {
+      this.eventQueue.shift();
+    }
+
     this.eventQueue.push(event);
+
+    return this.sendEvent(event);
+  },
+
+  async sendEvent(event, attempts = 0) {
     try {
       const response = await fetch(`${this.baseUrl}/api/events`, {
         method: "POST",
-
         headers: {
           "Content-Type": "application/json",
           "x-api-key": this.apiKey,
         },
-
         body: JSON.stringify({
-          eventName,
-          properties,
+          eventName: event.eventName,
+          properties: event.properties,
         }),
       });
 
@@ -83,13 +103,36 @@ const PulseMetrics = {
       if (!response.ok) {
         throw new Error(data.message || "Failed to record event");
       }
-      this.eventQueue.shift();
+
+      const index = this.eventQueue.indexOf(event);
+
+      if (index !== -1) {
+        this.eventQueue.splice(index, 1);
+      }
 
       return data;
     } catch (error) {
-      console.error("PulseMetrics Error:", error.message);
-      return null;
+      if (attempts >= 2) {
+        console.error("PulseMetrics Error:", error.message);
+        return null;
+      }
+      await this.wait(1000); // Wait for 1 second before retrying
+
+      return this.sendEvent(event, attempts + 1);
     }
+  },
+  async flush() {
+    const events = [...this.eventQueue];
+
+    for (const event of events) {
+      await this.sendEvent(event);
+    }
+  },
+
+  wait(ms) {
+    return new Promise((resolve) => {
+      setTimeout(resolve, ms);
+    });
   },
 };
 //eventname normalization and properties size
