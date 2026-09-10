@@ -3,6 +3,7 @@ const PulseMetrics = {
   baseUrl: null,
   eventQueue: [],
   maxQueueSize: 100,
+  queueStorageKey: "pulsemetrics_event_queue",
 
   init({ apiKey, baseUrl = "http://localhost:3000" }) {
     if (!apiKey) {
@@ -15,6 +16,7 @@ const PulseMetrics = {
 
     this.apiKey = apiKey;
     this.baseUrl = baseUrl;
+    this.loadQueue();
 
     console.log("PulseMetrics initialized");
     if (typeof window !== "undefined") {
@@ -80,8 +82,27 @@ const PulseMetrics = {
     }
 
     this.eventQueue.push(event);
+    this.saveQueue();
 
     return this.sendEvent(event);
+  },
+
+  loadQueue() {
+    const storedQueue = localStorage.getItem(this.queueStorageKey);
+
+    if (!storedQueue) {
+      return;
+    }
+
+    try {
+      this.eventQueue = JSON.parse(storedQueue);
+    } catch (error) {
+      console.error("Failed to load PulseMetrics queue:", error.message);
+      this.eventQueue = [];
+    }
+  },
+  saveQueue() {
+    localStorage.setItem(this.queueStorageKey, JSON.stringify(this.eventQueue));
   },
 
   async sendEvent(event, attempts = 0) {
@@ -108,6 +129,7 @@ const PulseMetrics = {
 
       if (index !== -1) {
         this.eventQueue.splice(index, 1);
+        this.saveQueue();
       }
 
       return data;
@@ -126,6 +148,13 @@ const PulseMetrics = {
 
     for (const event of events) {
       await this.sendEvent(event);
+    }
+  },
+
+  destroy() {
+    if (this.flushInterval) {
+      clearInterval(this.flushInterval);
+      this.flushInterval = null;
     }
   },
 

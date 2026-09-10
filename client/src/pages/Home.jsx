@@ -13,6 +13,7 @@ import {
   getRecentEvents,
   getEventsByDay,
   getProjects,
+  
 } from "../services/api";
 
 const Home = () => {
@@ -21,6 +22,7 @@ const Home = () => {
   const [recentEvents, setRecentEvents] = useState([]);
   const [eventsByDay, setEventsByDay] = useState([]);
   const [projects, setProjects] = useState([]);
+  
 
   useEffect(() => {
     const fetchOverview = async () => {
@@ -33,7 +35,6 @@ const Home = () => {
             getEventsByDay(),
             getProjects(),
           ]);
-
         setTopEvents(topEventsData);
         setOverview(overviewData);
         setRecentEvents(recentEventsData);
