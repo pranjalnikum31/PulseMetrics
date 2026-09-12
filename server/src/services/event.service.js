@@ -1,4 +1,5 @@
 const prisma = require("../config/prisma");
+const redis = require("../config/redis");
 
 const createEventService = async (eventData, apiKey) => {
   try {
@@ -16,6 +17,11 @@ const createEventService = async (eventData, apiKey) => {
       select: {
         projectId: true,
         isActive: true,
+        project: {
+          select: {
+            companyId: true,
+          },
+        },
       },
     });
 
@@ -40,6 +46,10 @@ const createEventService = async (eventData, apiKey) => {
         projectId: apiKeyRecord.projectId,
       },
     });
+
+    const cacheKey = `overview:company:${apiKeyRecord.project.companyId}`;
+
+    await redis.del(cacheKey);
 
     return {
       success: true,

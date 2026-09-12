@@ -1,12 +1,28 @@
 const prisma = require("../config/prisma");
+const redis = require("../config/redis");
 
 const getOverviewService = async (user) => {
   try {
+    const cacheKey = `overview:company:${user.companyId}`;
+
+    const cachedData = await redis.get(cacheKey);
+
+    if (cachedData) {
+      console.log("Overview cache hit");
+      return {
+        success: true,
+        data: JSON.parse(cachedData),
+      };
+    }
+
+    console.log("Overview cache miss");
+
     const totalProjects = await prisma.project.count({
       where: {
         companyId: user.companyId,
       },
     });
+
     const totalEvents = await prisma.event.count({
       where: {
         project: {
@@ -14,6 +30,7 @@ const getOverviewService = async (user) => {
         },
       },
     });
+
     const activeApiKeys = await prisma.apiKey.count({
       where: {
         isActive: true,
@@ -22,13 +39,20 @@ const getOverviewService = async (user) => {
         },
       },
     });
+
+    const data = {
+      totalProjects,
+      totalEvents,
+      activeApiKeys,
+    };
+
+    await redis.set(cacheKey, JSON.stringify(data), {
+      EX: 60,
+    });
+
     return {
       success: true,
-      data: {
-        totalProjects,
-        totalEvents,
-        activeApiKeys,
-      },
+      data,
     };
   } catch (error) {
     throw error;
