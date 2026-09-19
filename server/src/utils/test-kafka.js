@@ -12,6 +12,7 @@ const run = async () => {
           properties: {
             source: "kafka-test",
           },
+          projectId: "bdd24cb6-d988-4a4f-83d0-9ed63e1131d8",
         }),
       },
     ],

@@ -1,5 +1,6 @@
 const prisma = require("../config/prisma");
 const redis = require("../config/redis");
+const { producer } = require("../config/kafka");
 
 const createEventService = async (eventData, apiKey) => {
   try {
@@ -39,22 +40,23 @@ const createEventService = async (eventData, apiKey) => {
       };
     }
 
-    const event = await prisma.event.create({
-      data: {
-        eventName: eventData.eventName,
-        properties: eventData.properties,
-        projectId: apiKeyRecord.projectId,
-      },
+    await producer.send({
+      topic: "pulsemetrics-events",
+      messages: [
+        {
+          key: apiKeyRecord.projectId,
+          value: JSON.stringify({
+            eventName: eventData.eventName,
+            properties: eventData.properties,
+            projectId: apiKeyRecord.projectId,
+          }),
+        },
+      ],
     });
-
-    const cacheKey = `overview:company:${apiKeyRecord.project.companyId}`;
-
-    await redis.del(cacheKey);
 
     return {
       success: true,
       message: "Event recorded successfully",
-      data: event,
     };
   } catch (error) {
     throw error;
