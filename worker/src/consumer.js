@@ -16,7 +16,7 @@ const kafka = new Kafka({
 });
 
 const consumer = kafka.consumer({
-  groupId: "pulsemetrics-worker-test-v2",
+  groupId: "pulsemetrics-worker-group",
 });
 
 const run = async () => {
@@ -26,7 +26,7 @@ const run = async () => {
 
   await consumer.subscribe({
     topic: "pulsemetrics-events",
-    fromBeginning: false,
+    fromBeginning: true,
   });
 
   console.log("Kafka consumer connected");
