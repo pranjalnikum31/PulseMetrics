@@ -20,6 +20,10 @@ api.interceptors.request.use(
 
 export const register = async (data) => {
   const response = await api.post("/auth/register", data);
+  const token = response.data.token;
+  if (token) {
+    localStorage.setItem("token", token);
+  }
   return response.data;
 };
 
