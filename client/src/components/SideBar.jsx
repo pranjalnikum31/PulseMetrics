@@ -1,4 +1,3 @@
-import React from "react";
 import {
   LayoutDashboard,
   FolderKanban,
@@ -7,8 +6,11 @@ import {
   Activity,
   Settings,
 } from "lucide-react";
+import { useNavigate, useLocation } from "react-router-dom";
 
 const SideBar = () => {
+  const navigate = useNavigate();
+  const location = useLocation();
   return (
     <div>
       <aside>
@@ -19,9 +21,14 @@ const SideBar = () => {
           <NavItem
             icon={<LayoutDashboard size={18} />}
             label="Dashboard"
-            active
+            active={location.pathname === "/"}
           />
-          <NavItem icon={<FolderKanban size={18} />} label="Projects" />
+          <NavItem
+            icon={<FolderKanban size={18} />}
+            label="Projects"
+            active={location.pathname === "/projects"}
+            onClick={() => navigate("/projects")}
+          />
 
           <NavItem icon={<KeyRound size={18} />} label="API Keys" />
 
@@ -36,9 +43,16 @@ const SideBar = () => {
   );
 };
 
-function NavItem({ icon, label, active }) {
+function NavItem({ icon, label, active, onClick }) {
   return (
-    <div className={`flex items-center gap-3 px-4 py-3 rounded-lg cursor-pointer ${active ?"bg-[#6366F1] text-white":"text-[#94A3B8] hover:bg-[#0F1726] hover:text-white"}`}>
+    <div
+      onClick={onClick}
+      className={`flex items-center gap-3 px-4 py-3 rounded-lg cursor-pointer ${
+        active
+          ? "bg-[#6366F1] text-white"
+          : "text-[#94A3B8] hover:bg-[#0F1726] hover:text-white"
+      }`}
+    >
       {icon}
 
       <span className="text-sm font-medium">{label}</span>
