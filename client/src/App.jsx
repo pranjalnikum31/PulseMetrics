@@ -6,6 +6,7 @@ import Signup from './pages/SignUp';
 import Login from './pages/Login';
 import ProtectedRoute from './components/ProtectedRoute';
 import Projects from './pages/Projects';
+import ProjectDetails from './pages/ProjectDetails';
 
 
 function App() {
@@ -17,6 +18,7 @@ function App() {
           <Route path="/signup" element={<Signup />} />
           <Route path="/login" element={<Login />} />
           <Route path='/projects' element={<ProtectedRoute><Projects /></ProtectedRoute>} />
+          <Route path="/projects/:id" element={<ProtectedRoute><ProjectDetails /></ProtectedRoute>} />
         </Routes>
       </BrowserRouter>
     </>

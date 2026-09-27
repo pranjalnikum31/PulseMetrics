@@ -64,4 +64,20 @@ export const getProjects = async () => {
   const response = await api.get("/projects");
   return response.data.data;
 };
+export const createProject = async (data) => {
+  const response = await api.post("/projects", data);
+  return response.data;
+};
+export const getProjectById = async (id) => {
+  const response = await api.get(`/projects/${id}`);
+  return response.data.data;
+};
+export const getApiKeys = async () => {
+  const response = await api.get("/api-keys");
+  return response.data.data;
+};
+export const createApiKey = async (data) => {
+  const response = await api.post("/api-keys", data);
+  return response.data;
+};
 export default api;
