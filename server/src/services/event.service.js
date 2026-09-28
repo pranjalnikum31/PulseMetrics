@@ -13,7 +13,7 @@ const createEventService = async (eventData, apiKey) => {
 
     const apiKeyRecord = await prisma.apiKey.findUnique({
       where: {
-        secretKey: apiKey,
+        publicKey: apiKey,
       },
       select: {
         projectId: true,

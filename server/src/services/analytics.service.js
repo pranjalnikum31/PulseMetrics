@@ -171,9 +171,81 @@ const getEventsByDayService = async (user, days) => {
   }
 };
 
+const getProjectAnalyticsService = async (projectId, user) => {
+  try {
+    const project = await prisma.project.findFirst({
+      where: {
+        id: projectId,
+        companyId: user.companyId,
+      },
+    });
+
+    if (!project) {
+      return {
+        success: false,
+        message: "Project not found",
+      };
+    }
+
+    const totalEvents = await prisma.event.count({
+      where: {
+        projectId,
+      },
+    });
+
+    const topEvents = await prisma.event.groupBy({
+      by: ["eventName"],
+      where: {
+        projectId,
+      },
+      _count: {
+        eventName: true,
+      },
+      orderBy: {
+        _count: {
+          eventName: "desc",
+        },
+      },
+      take: 5,
+    });
+
+    const recentEvents = await prisma.event.findMany({
+      where: {
+        projectId,
+      },
+      orderBy: {
+        timestamp: "desc",
+      },
+      take: 10,
+      select: {
+        id: true,
+        eventName: true,
+        properties: true,
+        timestamp: true,
+      },
+    });
+
+    return {
+      success: true,
+      data: {
+        project,
+        totalEvents,
+        topEvents: topEvents.map((event) => ({
+          eventName: event.eventName,
+          count: event._count.eventName,
+        })),
+        recentEvents,
+      },
+    };
+  } catch (error) {
+    throw error;
+  }
+};
+
 module.exports = {
   getOverviewService,
   getTopEventsService,
   getRecentEventsService,
   getEventsByDayService,
+  getProjectAnalyticsService,
 };

@@ -80,4 +80,8 @@ export const createApiKey = async (data) => {
   const response = await api.post("/api-keys", data);
   return response.data;
 };
+export const getProjectAnalytics = async (id) => {
+  const response = await api.get(`/analytics/project/${id}`);
+  return response.data.data;
+};
 export default api;
