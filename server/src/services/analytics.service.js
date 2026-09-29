@@ -225,6 +225,21 @@ const getProjectAnalyticsService = async (projectId, user) => {
       },
     });
 
+    const eventsByDay = await prisma.$queryRaw`
+      SELECT 
+        dates.date,
+        COUNT(e.id)::int AS count
+      FROM generate_series(
+        CURRENT_DATE - INTERVAL '6 days',
+        CURRENT_DATE,
+        INTERVAL '1 day'
+      ) AS dates(date)
+      LEFT JOIN "Event" e
+        ON DATE(e."timestamp") = dates.date
+        AND e."projectId" = ${projectId}
+      GROUP BY dates.date
+      ORDER BY dates.date ASC
+    `;
     return {
       success: true,
       data: {
@@ -235,6 +250,7 @@ const getProjectAnalyticsService = async (projectId, user) => {
           count: event._count.eventName,
         })),
         recentEvents,
+        eventsByDay,
       },
     };
   } catch (error) {

@@ -9,6 +9,7 @@ import {
 import SideBar from "../components/SideBar";
 import Header from "../components/Header";
 import { X } from "lucide-react";
+import EventsChart from "../components/EventsChart";
 
 const copyToClipboard = async (text) => {
   await navigator.clipboard.writeText(text);
@@ -44,6 +45,15 @@ const ProjectDetails = () => {
 
     fetchProject();
   }, [id]);
+
+  const chartData =
+    analytics?.eventsByDay?.map((item) => ({
+      date: new Date(item.date).toLocaleDateString("en-IN", {
+        day: "2-digit",
+        month: "short",
+      }),
+      events: item.count,
+    })) || [];
 
   const handleCreateApiKey = async () => {
     if (!keyName.trim()) return;
@@ -108,7 +118,7 @@ const ProjectDetails = () => {
                 <p className="text-sm mt-2">{project.name}</p>
               </div>
             </div>
-            <div className="grid grid-cols-3 gap-5 mt-8">
+            <div className="grid grid-cols-3 gap-5 mt-8 mb-6">
               <div className="bg-[#0D1422] border border-white/10 rounded-xl p-5">
                 <p className="text-sm text-[#94A3B8]">Total Events</p>
 
@@ -117,6 +127,7 @@ const ProjectDetails = () => {
                 </p>
               </div>
             </div>
+            <EventsChart data={chartData} />
             <div className="mt-6 bg-[#0D1422] border border-white/10 rounded-xl p-6">
               <h2 className="text-lg font-semibold">Top Events</h2>
 
