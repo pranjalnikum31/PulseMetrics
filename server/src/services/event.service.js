@@ -109,4 +109,5 @@ const createServerEventService = async (eventData, apiKey) => {
 
 module.exports = {
   createEventService,
+  createServerEventService,
 };
