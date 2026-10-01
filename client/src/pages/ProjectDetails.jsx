@@ -346,41 +346,103 @@ const ProjectDetails = () => {
             </p>
           </div>
 
-          <div className="bg-[#0D1422] border border-white/10 rounded-xl p-6">
-            <div>
-              <p className="text-sm font-medium mb-2">1. Install the SDK</p>
+          <div className="space-y-6">
+            {/* Browser SDK */}
+            <div className="bg-[#0D1422] border border-white/10 rounded-xl p-6">
+              <h3 className="text-base font-semibold">Browser SDK</h3>
 
-              <div className="bg-[#080D18] border border-white/10 rounded-lg px-4 py-3">
-                <code className="text-sm text-[#94A3B8]">
-                  npm install pulsemetrics
-                </code>
-              </div>
-            </div>
-
-            <div className="mt-6">
-              <p className="text-sm font-medium mb-2">
-                2. Initialize PulseMetrics
+              <p className="text-sm text-[#94A3B8] mt-1">
+                Use the public key in browser and frontend applications.
               </p>
 
-              <div className="bg-[#080D18] border border-white/10 rounded-lg p-4 overflow-x-auto">
-                <pre className="text-sm text-[#94A3B8]">
-                  {`PulseMetrics.init({
-  apiKey: "${apiKeys.find((key) => key.project?.id === id)?.publicKey || "pk_live_..."}",
-  baseUrl: "http://localhost:3000"
-})`}
-                </pre>
+              <div className="mt-6">
+                <p className="text-sm font-medium mb-2">1. Install the SDK</p>
+
+                <div className="bg-[#080D18] border border-white/10 rounded-lg px-4 py-3">
+                  <code className="text-sm text-[#94A3B8]">
+                    npm install pulsemetrics
+                  </code>
+                </div>
+              </div>
+
+              <div className="mt-6">
+                <p className="text-sm font-medium mb-2">
+                  2. Initialize PulseMetrics
+                </p>
+
+                <div className="bg-[#080D18] border border-white/10 rounded-lg p-4 overflow-x-auto">
+                  <pre className="text-sm text-[#94A3B8]">
+                    {`import PulseMetrics from "pulsemetrics";
+                      PulseMetrics.init({
+                        apiKey: "${apiKeys.find((key) => key.project?.id === id)?.publicKey || "pk_live_..."}",
+                        baseUrl: "http://localhost:3000"
+                      });`
+                    }
+                  </pre>
+                </div>
+              </div>
+
+              <div className="mt-6">
+                <p className="text-sm font-medium mb-2">3. Track an event</p>
+
+                <div className="bg-[#080D18] border border-white/10 rounded-lg p-4 overflow-x-auto">
+                  <pre className="text-sm text-[#94A3B8]">
+                    {`PulseMetrics.track("signup", {
+                        plan: "pro"
+                      });`
+                    }
+                  </pre>
+                </div>
               </div>
             </div>
 
-            <div className="mt-6">
-              <p className="text-sm font-medium mb-2">3. Track an event</p>
+            {/* Server SDK */}
+            <div className="bg-[#0D1422] border border-white/10 rounded-xl p-6">
+              <h3 className="text-base font-semibold">Server SDK</h3>
 
-              <div className="bg-[#080D18] border border-white/10 rounded-lg p-4 overflow-x-auto">
-                <pre className="text-sm text-[#94A3B8]">
-                  {`PulseMetrics.track("signup", {
-  plan: "pro"
-})`}
-                </pre>
+              <p className="text-sm text-[#94A3B8] mt-1">
+                Use the secret key only in your backend or server environment.
+              </p>
+
+              <div className="mt-6">
+                <p className="text-sm font-medium mb-2">1. Install the SDK</p>
+
+                <div className="bg-[#080D18] border border-white/10 rounded-lg px-4 py-3">
+                  <code className="text-sm text-[#94A3B8]">
+                    npm install pulsemetrics
+                  </code>
+                </div>
+              </div>
+
+              <div className="mt-6">
+                <p className="text-sm font-medium mb-2">
+                  2. Initialize the Server SDK
+                </p>
+
+                <div className="bg-[#080D18] border border-white/10 rounded-lg p-4 overflow-x-auto">
+                  <pre className="text-sm text-[#94A3B8]">
+                    {`import PulseMetricsServer from "pulsemetrics/server";
+
+                      const analytics = new PulseMetricsServer({
+                        apiKey: "sk_live_...",
+                        baseUrl: "http://localhost:3000"
+                      });`
+                    }
+                  </pre>
+                </div>
+              </div>
+
+              <div className="mt-6">
+                <p className="text-sm font-medium mb-2">3. Track an event</p>
+
+                <div className="bg-[#080D18] border border-white/10 rounded-lg p-4 overflow-x-auto">
+                  <pre className="text-sm text-[#94A3B8]">
+                    {`analytics.track("order_created", {
+                        orderId: "123"
+                      });`
+                    }
+                  </pre>
+                </div>
               </div>
             </div>
           </div>
