@@ -4,3 +4,18 @@ services:
     container_name: pulsemetrics-kafka
     ports:
       - "9092:9092"
+
+  timescaledb:
+    image: timescale/timescaledb:latest-pg16
+    container_name: pulsemetrics-timescaledb
+    ports:
+      - "5433:5432"
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: pulsemetrics
+    volumes:
+      - timescaledb_data:/var/lib/postgresql/data
+
+volumes:
+  timescaledb_data:
