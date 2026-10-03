@@ -171,8 +171,22 @@ const getEventsByDayService = async (user, days) => {
   }
 };
 
-const getProjectAnalyticsService = async (projectId, user) => {
+const getProjectAnalyticsService = async (projectId, user, days = 7) => {
   try {
+    const cacheKey = `analytics:project:${projectId}:${days}`;
+
+    const cachedData = await redis.get(cacheKey);
+
+    if (cachedData) {
+      console.log("Project analytics cache hit");
+
+      return {
+        success: true,
+        data: JSON.parse(cachedData),
+      };
+    }
+
+    console.log("Project analytics cache miss");
     const project = await prisma.project.findFirst({
       where: {
         id: projectId,
@@ -187,16 +201,22 @@ const getProjectAnalyticsService = async (projectId, user) => {
       };
     }
 
-    const totalEvents = await prisma.event.count({
-      where: {
-        projectId,
-      },
-    });
+    const totalEventsResult = await prisma.$queryRaw`
+      SELECT COUNT(*)::int AS count
+      FROM "Event"
+      WHERE "projectId" = ${projectId}
+        AND "timestamp" >= CURRENT_DATE - (${days} - 1) * INTERVAL '1 day'
+    `;
+
+    const totalEvents = totalEventsResult[0].count;
 
     const topEvents = await prisma.event.groupBy({
       by: ["eventName"],
       where: {
         projectId,
+        timestamp: {
+          gte: new Date(Date.now() - days * 24 * 60 * 60 * 1000),
+        },
       },
       _count: {
         eventName: true,
@@ -230,7 +250,7 @@ const getProjectAnalyticsService = async (projectId, user) => {
         dates.date,
         COUNT(e.id)::int AS count
       FROM generate_series(
-        CURRENT_DATE - INTERVAL '6 days',
+        CURRENT_DATE - (${days} - 1) * INTERVAL '1 day',
         CURRENT_DATE,
         INTERVAL '1 day'
       ) AS dates(date)
@@ -240,18 +260,24 @@ const getProjectAnalyticsService = async (projectId, user) => {
       GROUP BY dates.date
       ORDER BY dates.date ASC
     `;
+    const data = {
+      project,
+      totalEvents,
+      topEvents: topEvents.map((event) => ({
+        eventName: event.eventName,
+        count: event._count.eventName,
+      })),
+      recentEvents,
+      eventsByDay,
+    };
+
+    await redis.set(cacheKey, JSON.stringify(data), {
+      EX: 60,
+    });
+
     return {
       success: true,
-      data: {
-        project,
-        totalEvents,
-        topEvents: topEvents.map((event) => ({
-          eventName: event.eventName,
-          count: event._count.eventName,
-        })),
-        recentEvents,
-        eventsByDay,
-      },
+      data,
     };
   } catch (error) {
     throw error;

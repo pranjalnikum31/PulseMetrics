@@ -42,7 +42,18 @@ const getEventsByDay = async (req, res) => {
 
 const getProjectAnalytics = async (req, res) => {
   try {
-    const result = await getProjectAnalyticsService(req.params.id, req.user);
+    const days = Number(req.query.days) || 7;
+    if (![7, 30, 90].includes(days)) {
+      return res.status(400).json({
+        success: false,
+        message: "Days must be 7, 30, or 90",
+      });
+    }
+    const result = await getProjectAnalyticsService(
+      req.params.id,
+      req.user,
+      days,
+    );
 
     res.status(result.success ? 200 : 404).json(result);
   } catch (error) {

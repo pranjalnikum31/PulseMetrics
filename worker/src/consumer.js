@@ -60,6 +60,11 @@ const run = async () => {
       const cacheKey = `overview:company:${project.companyId}`;
 
       await redis.del(cacheKey);
+      await redis.del(
+        `analytics:project:${event.projectId}:7`,
+        `analytics:project:${event.projectId}:30`,
+        `analytics:project:${event.projectId}:90`,
+      );
 
       console.log("Overview cache invalidated");
     },

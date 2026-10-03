@@ -9,7 +9,7 @@ import {
 } from "recharts";
 
 
-const EventsChart = ({ data }) => {
+const EventsChart = ({ data, days }) => {
   return (
     <div className="bg-[#0F1726] border border-[#1E293B] rounded-xl p-6 ">
       <div className="mb-6">
@@ -18,7 +18,7 @@ const EventsChart = ({ data }) => {
         </h2>
 
         <p className="text-sm text-[#94A3B8] mt-1">
-          Event activity over the last 7 days
+          Event activity over the last {days} days
         </p>
       </div>
       <div className="h-72">

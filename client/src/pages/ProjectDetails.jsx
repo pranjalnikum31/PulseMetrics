@@ -25,15 +25,16 @@ const ProjectDetails = () => {
   const [keyName, setKeyName] = useState("");
   const [createdKey, setCreatedKey] = useState(null);
   const [analytics, setAnalytics] = useState(null);
+  const [days, setDays] = useState(7);
 
   useEffect(() => {
     const fetchProject = async () => {
       try {
         const data = await getProjectById(id);
         const keys = await getApiKeys();
-        const analyticsData = await getProjectAnalytics(id);
-        setAnalytics(analyticsData);
+        const analyticsData = await getProjectAnalytics(id, days);
 
+        setAnalytics(analyticsData);
         setProject(data);
         setApiKeys(keys);
       } catch (error) {
@@ -44,7 +45,7 @@ const ProjectDetails = () => {
     };
 
     fetchProject();
-  }, [id]);
+  }, [id, days]);
 
   const chartData =
     analytics?.eventsByDay?.map((item) => ({
@@ -127,7 +128,28 @@ const ProjectDetails = () => {
                 </p>
               </div>
             </div>
-            <EventsChart data={chartData} />
+            <div className="flex justify-between items-center mb-4">
+              <h2 className="text-lg font-semibold">Events</h2>
+
+              <div className="flex gap-2">
+                {[7, 30, 90].map((value) => (
+                  <button
+                    key={value}
+                    onClick={() => setDays(value)}
+                    className={`px-3 py-1 rounded-md text-sm ${
+                      days === value
+                        ? "bg-blue-600 text-white"
+                        : "bg-gray-100 text-gray-700"
+                    }`}
+                  >
+                    {value} Days
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            <EventsChart data={chartData} days={days} />
+
             <div className="mt-6 bg-[#0D1422] border border-white/10 rounded-xl p-6">
               <h2 className="text-lg font-semibold">Top Events</h2>
 
@@ -376,8 +398,7 @@ const ProjectDetails = () => {
                       PulseMetrics.init({
                         apiKey: "${apiKeys.find((key) => key.project?.id === id)?.publicKey || "pk_live_..."}",
                         baseUrl: "http://localhost:3000"
-                      });`
-                    }
+                      });`}
                   </pre>
                 </div>
               </div>
@@ -389,8 +410,7 @@ const ProjectDetails = () => {
                   <pre className="text-sm text-[#94A3B8]">
                     {`PulseMetrics.track("signup", {
                         plan: "pro"
-                      });`
-                    }
+                      });`}
                   </pre>
                 </div>
               </div>
@@ -426,8 +446,7 @@ const ProjectDetails = () => {
                       const analytics = new PulseMetricsServer({
                         apiKey: "sk_live_...",
                         baseUrl: "http://localhost:3000"
-                      });`
-                    }
+                      });`}
                   </pre>
                 </div>
               </div>
@@ -439,8 +458,7 @@ const ProjectDetails = () => {
                   <pre className="text-sm text-[#94A3B8]">
                     {`analytics.track("order_created", {
                         orderId: "123"
-                      });`
-                    }
+                      });`}
                   </pre>
                 </div>
               </div>
