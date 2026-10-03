@@ -56,7 +56,7 @@ const run = async () => {
         },
       });
 
-      console.log("Event saved to PostgreSQL");
+      console.log("Event saved to database");
       const cacheKey = `overview:company:${project.companyId}`;
 
       await redis.del(cacheKey);
