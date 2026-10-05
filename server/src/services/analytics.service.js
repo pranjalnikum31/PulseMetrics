@@ -255,7 +255,8 @@ const getProjectAnalyticsService = async (projectId, user, days = 7) => {
         INTERVAL '1 day'
       ) AS dates(date)
       LEFT JOIN "Event" e
-        ON DATE(e."timestamp") = dates.date
+        ON e."timestamp" >= dates.date
+        AND e."timestamp" < dates.date + INTERVAL '1 day'
         AND e."projectId" = ${projectId}
       GROUP BY dates.date
       ORDER BY dates.date ASC
