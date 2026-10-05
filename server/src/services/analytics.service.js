@@ -246,19 +246,17 @@ const getProjectAnalyticsService = async (projectId, user, days = 7) => {
     });
 
     const eventsByDay = await prisma.$queryRaw`
-      SELECT 
+      SELECT
         dates.date,
-        COUNT(e.id)::int AS count
+        COALESCE(edc.event_count, 0)::int AS count
       FROM generate_series(
         CURRENT_DATE - (${days} - 1) * INTERVAL '1 day',
         CURRENT_DATE,
         INTERVAL '1 day'
       ) AS dates(date)
-      LEFT JOIN "Event" e
-        ON e."timestamp" >= dates.date
-        AND e."timestamp" < dates.date + INTERVAL '1 day'
-        AND e."projectId" = ${projectId}
-      GROUP BY dates.date
+      LEFT JOIN event_daily_counts edc
+        ON edc.day = dates.date
+        AND edc."projectId" = ${projectId}
       ORDER BY dates.date ASC
     `;
     const data = {
