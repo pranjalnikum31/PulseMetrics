@@ -6,6 +6,7 @@ const projectRoutes=require('./routes/project.routes')
 const apiKeyRoutes = require("./routes/apiKey.routes");
 const eventRoutes = require("./routes/event.routes");
 const analyticsRoutes = require("./routes/analytics.routes");
+const usageRoutes = require("./routes/usage.routes");
 
 app.use(cors({origin: "*"}));
 app.use(express.json());
@@ -19,4 +20,5 @@ app.use('/api/projects',projectRoutes);
 app.use("/api/api-keys", apiKeyRoutes);
 app.use("/api/events", eventRoutes);
 app.use("/api/analytics", analyticsRoutes);
+app.use("/api/usage", usageRoutes);
 module.exports = app;

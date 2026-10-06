@@ -1,6 +1,7 @@
 const prisma = require("../config/prisma");
 const redis = require("../config/redis");
 const { producer } = require("../config/kafka");
+const { checkUsageLimit } = require("./usage.service");
 
 const createEventService = async (eventData, apiKey) => {
   try {
@@ -21,6 +22,11 @@ const createEventService = async (eventData, apiKey) => {
         project: {
           select: {
             companyId: true,
+            company: {
+              select: {
+                plan: true,
+              },
+            },
           },
         },
       },
@@ -38,6 +44,16 @@ const createEventService = async (eventData, apiKey) => {
         success: false,
         message: "API key is inactive",
       };
+    }
+    const usage = await checkUsageLimit(
+      apiKeyRecord.project.companyId,
+      apiKeyRecord.project.company.plan,
+    );
+
+    if (!usage.allowed) {
+      const error = new Error("Monthly event limit reached");
+      error.statusCode = 429;
+      throw error;
     }
 
     await producer.send({
@@ -73,6 +89,16 @@ const createServerEventService = async (eventData, apiKey) => {
       select: {
         projectId: true,
         isActive: true,
+        project: {
+          select: {
+            companyId: true,
+            company: {
+              select: {
+                plan: true,
+              },
+            },
+          },
+        },
       },
     });
 
@@ -82,6 +108,17 @@ const createServerEventService = async (eventData, apiKey) => {
 
     if (!apiKeyRecord.isActive) {
       return { success: false, message: "API key is inactive" };
+    }
+
+    const usage = await checkUsageLimit(
+      apiKeyRecord.project.companyId,
+      apiKeyRecord.project.company.plan,
+    );
+
+    if (!usage.allowed) {
+      const error = new Error("Monthly event limit reached");
+      error.statusCode = 429;
+      throw error;
     }
 
     await producer.send({

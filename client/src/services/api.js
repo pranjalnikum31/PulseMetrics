@@ -84,4 +84,8 @@ export const getProjectAnalytics = async (id, days ) => {
   const response = await api.get(`/analytics/project/${id}?days=${days}`);
   return response.data.data;
 };
+export const getUsage = async () => {
+  const response = await api.get("/usage");
+  return response.data.data;
+};
 export default api;
