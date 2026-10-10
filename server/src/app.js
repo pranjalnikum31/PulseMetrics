@@ -7,8 +7,10 @@ const apiKeyRoutes = require("./routes/apiKey.routes");
 const eventRoutes = require("./routes/event.routes");
 const analyticsRoutes = require("./routes/analytics.routes");
 const usageRoutes = require("./routes/usage.routes");
+const billingRoutes = require("./routes/billing.routes");
 
 app.use(cors({origin: "*"}));
+app.use("/api/billing/webhook", express.raw({ type: "application/json" }));
 app.use(express.json());
 
 app.get('/',(req,res)=>{
@@ -21,4 +23,5 @@ app.use("/api/api-keys", apiKeyRoutes);
 app.use("/api/events", eventRoutes);
 app.use("/api/analytics", analyticsRoutes);
 app.use("/api/usage", usageRoutes);
+app.use("/api/billing", billingRoutes);
 module.exports = app;

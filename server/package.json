@@ -21,6 +21,7 @@
     "kafkajs": "^2.2.4",
     "morgan": "^1.11.0",
     "prisma": "^6.19.3",
+    "razorpay": "^2.9.8",
     "redis": "^6.2.1"
   },
   "devDependencies": {
