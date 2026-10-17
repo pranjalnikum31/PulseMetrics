@@ -171,22 +171,9 @@ const getEventsByDayService = async (user, days) => {
   }
 };
 
+
 const getProjectAnalyticsService = async (projectId, user, days = 7) => {
   try {
-    const cacheKey = `analytics:project:${projectId}:${days}`;
-
-    const cachedData = await redis.get(cacheKey);
-
-    if (cachedData) {
-      console.log("Project analytics cache hit");
-
-      return {
-        success: true,
-        data: JSON.parse(cachedData),
-      };
-    }
-
-    console.log("Project analytics cache miss");
     const project = await prisma.project.findFirst({
       where: {
         id: projectId,
@@ -201,6 +188,23 @@ const getProjectAnalyticsService = async (projectId, user, days = 7) => {
       };
     }
 
+    const cacheKey = `analytics:company:${user.companyId}:project:${projectId}:${days}`;
+    const cachedData = await redis.get(cacheKey);
+
+    if (cachedData) {
+      console.log("Project analytics cache hit");
+      return {
+        success: true,
+        data: JSON.parse(cachedData),
+      };
+    }
+
+    console.log("Project analytics cache miss");
+
+    // Keep the existing analytics queries and data formatting below.
+
+    
+
     const totalEventsResult = await prisma.$queryRaw`
       SELECT COUNT(*)::int AS count
       FROM "Event"
@@ -214,6 +218,9 @@ const getProjectAnalyticsService = async (projectId, user, days = 7) => {
       by: ["eventName"],
       where: {
         projectId,
+        project: {
+          companyId: user.companyId,
+        },
         timestamp: {
           gte: new Date(Date.now() - days * 24 * 60 * 60 * 1000),
         },
@@ -232,6 +239,9 @@ const getProjectAnalyticsService = async (projectId, user, days = 7) => {
     const recentEvents = await prisma.event.findMany({
       where: {
         projectId,
+        project: {
+          companyId: user.companyId,
+        },
       },
       orderBy: {
         timestamp: "desc",
