@@ -1,4 +1,4 @@
-
+import { useEffect, useState } from "react";
 import SideBar from "../components/SideBar";
 import Header from "../components/Header";
 import MetricCard from "../components/MetricCard";
@@ -7,7 +7,6 @@ import RecentActivity from "../components/RecentActivity";
 import TopEvents from "../components/TopEvents";
 import ProjectList from "../components/ProjectList";
 import BillingCard from "../components/BillingCard";
-import { useEffect, useState } from "react";
 import {
   getUsage,
   getOverview,
@@ -24,9 +23,12 @@ const Home = () => {
   const [eventsByDay, setEventsByDay] = useState([]);
   const [projects, setProjects] = useState([]);
   const [usage, setUsage] = useState(null);
+  const [days, setDays] = useState(7);
 
   useEffect(() => {
-    const fetchOverview = async () => {
+    let cancelled = false;
+
+    const fetchDashboard = async () => {
       try {
         const [
           overviewData,
@@ -37,40 +39,48 @@ const Home = () => {
           usageData,
         ] = await Promise.all([
           getOverview(),
-          getTopEvents(),
-          getRecentEvents(),
-          getEventsByDay(),
+          getTopEvents(days),
+          getRecentEvents(days),
+          getEventsByDay(days),
           getProjects(),
           getUsage(),
         ]);
 
+        if (cancelled) return;
+
         setOverview(overviewData);
-        setTopEvents(topEventsData);
-        setRecentEvents(recentEventsData);
-        setEventsByDay(eventsByDayData);
-        setProjects(projectsData);
+        setTopEvents(Array.isArray(topEventsData) ? topEventsData : []);
+        setRecentEvents(
+          Array.isArray(recentEventsData) ? recentEventsData : [],
+        );
+        setEventsByDay(Array.isArray(eventsByDayData) ? eventsByDayData : []);
+        setProjects(Array.isArray(projectsData) ? projectsData : []);
         setUsage(usageData);
       } catch (error) {
-        console.error("Failed to fetch overview:", error);
+        if (!cancelled) {
+          console.error("Failed to fetch dashboard:", error);
+        }
       }
     };
 
-    fetchOverview();
-  }, []);
+    fetchDashboard();
 
-  const chartData = Array.isArray(eventsByDay)
-    ? eventsByDay.map((item) => ({
-        date: item.date,
-        events: item.count,
-      }))
-    : [];
+    return () => {
+      cancelled = true;
+    };
+  }, [days]);
+
+  const chartData = eventsByDay.map((item) => ({
+    date: item.date,
+    events: Number(item.count ?? item.events ?? 0),
+  }));
 
   return (
     <div className="min-h-screen bg-[#080D18] flex">
       <SideBar />
 
-      <main className="flex-1 p-8">
-        <Header />
+      <main className="flex-1 min-w-0 p-8">
+        <Header days={days} onDaysChange={setDays} />
 
         <section className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-5 mb-6">
           <MetricCard
@@ -105,11 +115,11 @@ const Home = () => {
 
               <div className="flex items-end justify-between mb-3">
                 <span className="text-2xl font-bold text-white">
-                  {usage.usage.toLocaleString()}
+                  {Number(usage.usage ?? 0).toLocaleString()}
                 </span>
 
                 <span className="text-xs text-gray-500">
-                  / {usage.limit.toLocaleString()}
+                  / {Number(usage.limit ?? 0).toLocaleString()}
                 </span>
               </div>
 
@@ -123,7 +133,7 @@ const Home = () => {
                         : "bg-blue-500"
                   }`}
                   style={{
-                    width: `${Math.min(100, Math.max(0, usage.percentage))}%`,
+                    width: `${Math.min(100, Math.max(0, Number(usage.percentage) || 0))}%`,
                   }}
                 />
               </div>
@@ -139,22 +149,22 @@ const Home = () => {
               >
                 {usage.percentage >= 100
                   ? "Monthly event limit reached"
-                  : `${usage.remaining.toLocaleString()} events remaining`}
+                  : `${Number(usage.remaining ?? 0).toLocaleString()} events remaining`}
               </p>
             </div>
           )}
         </section>
 
         <section className="grid grid-cols-1 xl:grid-cols-3 gap-5 mb-6">
-          <div className="xl:col-span-2">
-            <EventsChart data={chartData} />
+          <div className="xl:col-span-2 min-w-0">
+            <EventsChart data={chartData} days={days} />
           </div>
 
           <RecentActivity events={recentEvents} />
         </section>
 
         <section className="grid grid-cols-1 xl:grid-cols-3 gap-5 mb-6">
-          <div className="xl:col-span-2">
+          <div className="xl:col-span-2 min-w-0">
             <TopEvents events={topEvents} />
           </div>
 

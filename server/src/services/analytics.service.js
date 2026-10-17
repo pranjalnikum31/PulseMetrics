@@ -58,13 +58,24 @@ const getOverviewService = async (user) => {
     throw error;
   }
 };
-const getTopEventsService = async (user) => {
+
+const getTopEventsService = async (user, days = 7) => {
   try {
+    days = [7, 30, 90].includes(Number(days)) ? Number(days) : 7;
+
+    const startDate = new Date();
+    startDate.setDate(startDate.getDate() - days + 1);
+    startDate.setHours(0, 0, 0, 0);
+
     const topEvents = await prisma.event.groupBy({
       by: ["eventName"],
       where: {
         project: {
           companyId: user.companyId,
+        },
+        timestamp: {
+          gte: startDate,
+          lte: new Date(),
         },
       },
       _count: {
@@ -78,24 +89,34 @@ const getTopEventsService = async (user) => {
       take: 5,
     });
 
-    const formattedEvents = topEvents.map((event) => ({
-      eventName: event.eventName,
-      count: event._count.eventName,
-    }));
     return {
       success: true,
-      data: formattedEvents,
+      data: topEvents.map((event) => ({
+        eventName: event.eventName,
+        count: event._count.eventName,
+      })),
     };
   } catch (error) {
     throw error;
   }
 };
-const getRecentEventsService = async (user) => {
+
+const getRecentEventsService = async (user, days = 7) => {
   try {
+    days = [7, 30, 90].includes(Number(days)) ? Number(days) : 7;
+
+    const startDate = new Date();
+    startDate.setDate(startDate.getDate() - days + 1);
+    startDate.setHours(0, 0, 0, 0);
+
     const recentEvents = await prisma.event.findMany({
       where: {
         project: {
           companyId: user.companyId,
+        },
+        timestamp: {
+          gte: startDate,
+          lte: new Date(),
         },
       },
       include: {
@@ -108,26 +129,27 @@ const getRecentEventsService = async (user) => {
       orderBy: {
         timestamp: "desc",
       },
-
       take: 10,
     });
-    const formattedEvents = recentEvents.map((event) => ({
-      id: event.id,
-      eventName: event.eventName,
-      project: event.project.name,
-      timestamp: event.timestamp,
-    }));
+
     return {
       success: true,
-      data: formattedEvents,
+      data: recentEvents.map((event) => ({
+        id: event.id,
+        eventName: event.eventName,
+        project: event.project.name,
+        timestamp: event.timestamp,
+      })),
     };
   } catch (error) {
     throw error;
   }
 };
+  
+
 const getEventsByDayService = async (user, days) => {
   try {
-    days = Number(days) || 7;
+    days = [7, 30, 90].includes(Number(days)) ? Number(days) : 7;
 
     const startDate = new Date();
     startDate.setDate(startDate.getDate() - days + 1);
@@ -140,6 +162,7 @@ const getEventsByDayService = async (user, days) => {
         },
         timestamp: {
           gte: startDate,
+          lte: new Date(),
         },
       },
       select: {
@@ -149,18 +172,38 @@ const getEventsByDayService = async (user, days) => {
         timestamp: "asc",
       },
     });
-    const eventsByDay = events.reduce((acc, event) => {
-      const date = event.timestamp.toISOString().split("T")[0];
 
-      acc[date] = (acc[date] || 0) + 1;
+    const eventsByDay = {};
 
-      return acc;
-    }, {});
+    for (let i = 0; i < days; i++) {
+      const date = new Date(startDate);
+      date.setDate(startDate.getDate() + i);
 
-    const formattedData = Object.keys(eventsByDay).map((date) => ({
-      date,
-      count: eventsByDay[date],
-    }));
+      const dateKey = [
+        date.getFullYear(),
+        String(date.getMonth() + 1).padStart(2, "0"),
+        String(date.getDate()).padStart(2, "0"),
+      ].join("-");
+
+      eventsByDay[dateKey] = 0;
+    }
+
+    for (const event of events) {
+      const timestamp = new Date(event.timestamp);
+      const dateKey = [
+        timestamp.getFullYear(),
+        String(timestamp.getMonth() + 1).padStart(2, "0"),
+        String(timestamp.getDate()).padStart(2, "0"),
+      ].join("-");
+
+      if (Object.prototype.hasOwnProperty.call(eventsByDay, dateKey)) {
+        eventsByDay[dateKey]++;
+      }
+    }
+
+    const formattedData = Object.entries(eventsByDay).map(
+      ([date, count]) => ({ date, count })
+    );
 
     return {
       success: true,
@@ -170,6 +213,7 @@ const getEventsByDayService = async (user, days) => {
     throw error;
   }
 };
+
 
 
 const getProjectAnalyticsService = async (projectId, user, days = 7) => {

@@ -53,12 +53,13 @@ export const getProfile = async () => {
   return response.data;
 };
 
-export const getTopEvents = async () => {
-  const response = await api.get("/analytics/top-events");
+export const getTopEvents = async (days = 7) => {
+  const response = await api.get(`/analytics/top-events?days=${days}`);
   return response.data.data;
 };
-export const getRecentEvents = async () => {
-  const response = await api.get("/analytics/recent-events");
+
+export const getRecentEvents = async (days = 7) => {
+  const response = await api.get(`/analytics/recent-events?days=${days}`);
   return response.data.data;
 };
 export const getEventsByDay = async (days = 7) => {
