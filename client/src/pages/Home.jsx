@@ -1,3 +1,4 @@
+
 import SideBar from "../components/SideBar";
 import Header from "../components/Header";
 import MetricCard from "../components/MetricCard";
@@ -5,6 +6,7 @@ import EventsChart from "../components/EventsChart";
 import RecentActivity from "../components/RecentActivity";
 import TopEvents from "../components/TopEvents";
 import ProjectList from "../components/ProjectList";
+import BillingCard from "../components/BillingCard";
 import { useEffect, useState } from "react";
 import {
   getUsage,
@@ -56,10 +58,12 @@ const Home = () => {
     fetchOverview();
   }, []);
 
-  const chartData = eventsByDay.map((item) => ({
-    date: item.date,
-    events: item.count,
-  }));
+  const chartData = Array.isArray(eventsByDay)
+    ? eventsByDay.map((item) => ({
+        date: item.date,
+        events: item.count,
+      }))
+    : [];
 
   return (
     <div className="min-h-screen bg-[#080D18] flex">
@@ -68,7 +72,7 @@ const Home = () => {
       <main className="flex-1 p-8">
         <Header />
 
-        <section className="grid grid-cols-4 gap-5 mb-6">
+        <section className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-5 mb-6">
           <MetricCard
             title="Total Projects"
             value={overview?.totalProjects ?? 0}
@@ -118,7 +122,9 @@ const Home = () => {
                         ? "bg-yellow-500"
                         : "bg-blue-500"
                   }`}
-                  style={{ width: `${usage.percentage}%` }}
+                  style={{
+                    width: `${Math.min(100, Math.max(0, usage.percentage))}%`,
+                  }}
                 />
               </div>
 
@@ -139,20 +145,24 @@ const Home = () => {
           )}
         </section>
 
-        <section className="grid grid-cols-3 gap-5">
-          <div className="col-span-2">
+        <section className="grid grid-cols-1 xl:grid-cols-3 gap-5 mb-6">
+          <div className="xl:col-span-2">
             <EventsChart data={chartData} />
           </div>
 
           <RecentActivity events={recentEvents} />
         </section>
 
-        <section className="grid grid-cols-3 gap-5 mt-6">
-          <div className="col-span-2">
+        <section className="grid grid-cols-1 xl:grid-cols-3 gap-5 mb-6">
+          <div className="xl:col-span-2">
             <TopEvents events={topEvents} />
           </div>
 
           <ProjectList projects={projects} />
+        </section>
+
+        <section className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5">
+          <BillingCard />
         </section>
       </main>
     </div>

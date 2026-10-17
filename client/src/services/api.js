@@ -4,19 +4,24 @@ const api = axios.create({
   baseURL: "http://localhost:3000/api",
 });
 
+
 api.interceptors.request.use(
   (config) => {
     const token = localStorage.getItem("token");
 
+    config.headers = config.headers || {};
+
     if (token) {
-      config.headers.Authorization = `Bearer ${token}`;
+      config.headers.set
+        ? config.headers.set("Authorization", `Bearer ${token}`)
+        : (config.headers.Authorization = `Bearer ${token}`);
     }
+    console.log("Axios token attached:", Boolean(localStorage.getItem("token")));
     return config;
   },
-  (error) => {
-    return Promise.reject(error);
-  },
+  (error) => Promise.reject(error)
 );
+
 
 export const register = async (data) => {
   const response = await api.post("/auth/register", data);
@@ -88,4 +93,10 @@ export const getUsage = async () => {
   const response = await api.get("/usage");
   return response.data.data;
 };
+
+export const createBillingSubscription = async () => {
+  const response = await api.post("/billing/subscription");
+  return response.data.data;
+};
+
 export default api;
