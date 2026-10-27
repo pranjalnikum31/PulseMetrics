@@ -1,5 +1,6 @@
 const prisma = require("../config/prisma");
 const crypto = require("crypto");
+const { createNotification } = require("./notification.service");
 
 const createApiKeyService = async (data, user) => {
   try {
@@ -27,6 +28,19 @@ const createApiKeyService = async (data, user) => {
         projectId, //sending both keys for now
       },
     });
+    try {
+      await createNotification({
+        companyId: user.companyId,
+        title: "API key created",
+        message: `A new API key "${name}" was created for project "${project.name}".`,
+        type: "SUCCESS",
+      });
+    } catch (notificationError) {
+      console.error(
+        "Failed to create API key notification:",
+        notificationError,
+      );
+    }
     return {
       success: true,
       message: "API key created successfully",
@@ -107,4 +121,5 @@ const updateApiKeyService = async (id, data, user) => {
 module.exports = {
   createApiKeyService,
   getAllApiKeysService,
+  updateApiKeyService,
 };

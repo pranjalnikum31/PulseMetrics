@@ -100,4 +100,30 @@ export const createBillingSubscription = async () => {
   return response.data.data;
 };
 
+export const updateApiKey = async (id, data) => {
+  const response = await api.patch(`/api-keys/${id}`, data);
+  return response.data;
+};
+
+export const getNotifications = async () => {
+  const response = await api.get("/notifications");
+  return response.data.data;
+};
+
+export const markNotificationAsRead = async (id) => {
+  const response = await api.patch(`/notifications/${id}/read`);
+  return response.data;
+};
+
+export const markAllNotificationsAsRead = async () => {
+  const response = await api.patch("/notifications/read-all");
+  return response.data;
+};
+
+export const clearReadNotifications = async () => {
+  const response = await api.delete("/notifications/read");
+  return response.data;
+};
+
+
 export default api;

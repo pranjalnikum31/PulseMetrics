@@ -1,4 +1,5 @@
 const prisma = require("../config/prisma");
+const { createNotification } = require("./notification.service");
 
 const createProjectService = async (data, user) => {
   const { name, description } = data;
@@ -27,6 +28,16 @@ const createProjectService = async (data, user) => {
       companyId: user.companyId,
     },
   });
+  try {
+    await createNotification({
+      companyId: user.companyId,
+      title: "Project created",
+      message: `Your project "${name}" was created successfully.`,
+      type: "SUCCESS",
+    });
+  } catch (notificationError) {
+    console.error("Failed to create project notification:", notificationError);
+  }
   return {
     success: true,
     message: "Project created successfully",
@@ -181,5 +192,5 @@ module.exports = {
   getAllProjectsService,
   getProjectByIdService,
   updateProjectService,
-  deleteProjectService
+  deleteProjectService,
 };

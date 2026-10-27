@@ -8,6 +8,7 @@ const eventRoutes = require("./routes/event.routes");
 const analyticsRoutes = require("./routes/analytics.routes");
 const usageRoutes = require("./routes/usage.routes");
 const billingRoutes = require("./routes/billing.routes");
+const notificationRoutes = require("./routes/notification.routes");
 
 app.use(cors({origin: "*"}));
 app.use("/api/billing/webhook", express.raw({ type: "application/json" }));
@@ -24,4 +25,5 @@ app.use("/api/events", eventRoutes);
 app.use("/api/analytics", analyticsRoutes);
 app.use("/api/usage", usageRoutes);
 app.use("/api/billing", billingRoutes);
+app.use("/api/notifications", notificationRoutes);
 module.exports = app;

@@ -22,6 +22,7 @@ const SideBar = () => {
             icon={<LayoutDashboard size={18} />}
             label="Dashboard"
             active={location.pathname === "/"}
+            onClick={() => navigate("/")}
           />
           <NavItem
             icon={<FolderKanban size={18} />}
@@ -30,13 +31,33 @@ const SideBar = () => {
             onClick={() => navigate("/projects")}
           />
 
-          <NavItem icon={<KeyRound size={18} />} label="API Keys" />
+          <NavItem
+            icon={<KeyRound size={18} />}
+            label="API Keys"
+            active={location.pathname === "/api-keys"}
+            onClick={() => navigate("/api-keys")}
+          />
 
-          <NavItem icon={<BarChart3 size={18} />} label="Analytics" />
+          <NavItem
+            icon={<BarChart3 size={18} />}
+            label="Analytics"
+            active={location.pathname === "/analytics"}
+            onClick={() => navigate("/analytics")}
+          />
 
-          <NavItem icon={<Activity size={18} />} label="Activity" />
+          <NavItem
+            icon={<Activity size={18} />}
+            label="Activity"
+            active={location.pathname === "/activity"}
+            onClick={() => navigate("/activity")}
+          />
 
-          <NavItem icon={<Settings size={18} />} label="Settings" />
+          <NavItem
+            icon={<Settings size={18} />}
+            label="Settings"
+            active={location.pathname === "/settings"}
+            onClick={() => navigate("/settings")}
+          />
         </nav>
       </aside>
     </div>
